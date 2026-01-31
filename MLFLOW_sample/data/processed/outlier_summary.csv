@@ -1,0 +1,6 @@
+Feature,Lower_Bound,Upper_Bound,Outlier_Count,Outlier_Percent
+SqFt,1490.0,2530.0,2,1.5625
+Bedrooms,3.0,3.0,61,47.65625
+Bathrooms,0.5,4.5,0,0.0
+Offers,0.5,4.5,4,3.125
+Price,55937.5,203637.5,1,0.78125

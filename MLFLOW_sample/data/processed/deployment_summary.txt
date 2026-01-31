@@ -1,0 +1,33 @@
+============================================================
+MODEL DEPLOYMENT SUMMARY
+============================================================
+
+Model Name: house_price_regression
+Version: 3
+Stage: Production
+Model Type: Ridge
+Deployment Date: 2026-01-26 08:20:42
+
+Performance Metrics:
+  • RMSE: $1,865.47
+  • MAE:  $1,284.21
+  • R²:   0.9941
+
+Model URI: models:/house_price_regression/Production
+Run ID: 6c0d10dbb71f478cb37e2460aa539fb7
+
+Input Features (14):
+  1. SqFt
+  2. Bedrooms
+  3. Bathrooms
+  4. Offers
+  5. Brick
+  6. Neighborhood
+  7. PricePerSqFt
+  8. TotalRooms
+  9. BathBedroomRatio
+  10. SqFtPerRoom
+  11. OffersPerRoom
+  12. SqFt_Bedrooms
+  13. SqFt_Bathrooms
+  14. BrickPremium

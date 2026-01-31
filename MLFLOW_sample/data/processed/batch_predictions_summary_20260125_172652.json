@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-25T17:26:53.057409",
+  "model_name": "house_price_regression",
+  "model_version": "1",
+  "model_type": "Ridge",
+  "total_predictions": 100,
+  "prediction_statistics": {
+    "mean": 127633.80066948675,
+    "median": 125928.44586124251,
+    "std": 24634.456568985544,
+    "min": 63661.081528256196,
+    "max": 185669.9899544282
+  },
+  "confidence_intervals": {
+    "mean_width": 7312.6243252404565,
+    "median_width": 7312.624325240467
+  },
+  "accuracy_metrics": {
+    "rmse": 1828.043263617074,
+    "mae": 1242.6437255046405,
+    "r2": 0.9944087957010546
+  }
+}

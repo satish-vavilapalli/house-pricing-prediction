@@ -1,0 +1,40 @@
+{
+  "deployment_info": {
+    "model_name": "house_price_regression",
+    "model_version": "3",
+    "model_stage": "Production",
+    "model_type": "Ridge",
+    "deployment_date": "2026-01-26T08:20:41.913194",
+    "deployed_by": "Satish"
+  },
+  "model_performance": {
+    "rmse": 1865.4653890919558,
+    "mae": 1284.2146679648029,
+    "r2": 0.9940957453877192,
+    "mean_pct_error": 1.017096974032763,
+    "median_pct_error": 0.6306642898337597
+  },
+  "model_uri": {
+    "production": "models:/house_price_regression/Production",
+    "versioned": "models:/house_price_regression/3",
+    "run_id": "6c0d10dbb71f478cb37e2460aa539fb7"
+  },
+  "input_features": [
+    "SqFt",
+    "Bedrooms",
+    "Bathrooms",
+    "Offers",
+    "Brick",
+    "Neighborhood",
+    "PricePerSqFt",
+    "TotalRooms",
+    "BathBedroomRatio",
+    "SqFtPerRoom",
+    "OffersPerRoom",
+    "SqFt_Bedrooms",
+    "SqFt_Bathrooms",
+    "BrickPremium"
+  ],
+  "target_variable": "Price",
+  "test_set_size": 26
+}

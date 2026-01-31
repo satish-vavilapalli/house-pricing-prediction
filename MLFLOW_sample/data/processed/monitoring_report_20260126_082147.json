@@ -1,0 +1,45 @@
+{
+  "report_timestamp": "2026-01-26T08:21:47.155644",
+  "model_name": "house_price_regression",
+  "model_type": "Ridge",
+  "baseline_metrics": {
+    "rmse": 1897.104838797685,
+    "mae": 1279.333930578452,
+    "r2": 0.9951893457228442,
+    "mean_prediction": 130747.05882352941,
+    "std_prediction": 27262.369562007454,
+    "mean_actual": 130747.05882352941,
+    "std_actual": 27487.08321628688
+  },
+  "current_metrics": {
+    "rmse": 1865.4653890919558,
+    "mae": 1284.2146679648029,
+    "r2": 0.9940957453877192,
+    "mean_prediction": 129492.24813441919,
+    "std_prediction": 24508.69361183437,
+    "mean_actual": 129173.07692307692,
+    "std_actual": 24758.328823930064
+  },
+  "drift_metrics": {
+    "rmse_change_pct": -1.667775499733645,
+    "mae_change_pct": 0.381506131408863,
+    "r2_change_pct": -0.10988866991243186,
+    "mean_pred_change_pct": -0.9597238365444625,
+    "std_pred_change_pct": -10.100647868887297
+  },
+  "alerts": [],
+  "alert_count": 0,
+  "feature_drift_summary": {
+    "total_features": 14,
+    "drifted_features": 0,
+    "drift_percentage": 0.0
+  },
+  "data_quality": {
+    "missing_values": 0,
+    "quality_issues": [
+      "\u26a0\ufe0f 1 features have out-of-range values"
+    ],
+    "issue_count": 1
+  },
+  "recommendation": "Model performance is stable"
+}
