@@ -1,0 +1,82 @@
+name: CD - Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Databricks Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: 📦 Install Databricks CLI
+        run: |
+          pip install databricks-cli
+          
+      - name: 🔐 Configure Databricks CLI
+        run: |
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+          echo "✅ Databricks CLI configured"
+      
+      - name: 📂 Sync Notebooks to Databricks
+        run: |
+          echo "Syncing notebooks to Databricks workspace..."
+          python scripts/deploy_notebooks.py \
+            --workspace-path "/Workspace/COMM - Commercial Analytics (CMAN)/MMM Quattro 2025/Satish/MLFLOW_sample" \
+            --source-path "MLFLOW_sample/notebooks"
+          echo "✅ Notebooks synced successfully"
+      
+      - name: 🚀 Trigger Training Pipeline
+        id: training
+        run: |
+          echo "Triggering ML training pipeline..."
+          RUN_ID=$(databricks jobs run-now --job-id ${{ secrets.TRAINING_JOB_ID }} | jq -r '.run_id')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "✅ Training pipeline started (Run ID: $RUN_ID)"
+      
+      - name: 📢 Send Teams Notification - Success
+        if: success()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "🚀 Production Deployment Successful"
+          summary: "House Price Prediction model deployed to production"
+          sections: |
+            [
+              {
+                "activityTitle": "Deployment Details",
+                "activitySubtitle": "${{ github.actor }} deployed to production",
+                "facts": [
+                  {"name": "Environment:", "value": "Production"},
+                  {"name": "Deployed by:", "value": "${{ github.actor }}"},
+                  {"name": "Commit:", "value": "${{ github.event.head_commit.message }}"},
+                  {"name": "Training Run ID:", "value": "${{ steps.training.outputs.run_id }}"}
+                ]
+              }
+            ]
+          theme_color: '00FF00'
+      
+      - name: 📢 Send Teams Notification - Failure
+        if: failure()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "❌ Production Deployment Failed"
+          summary: "Deployment to production failed"
+          text: |
+            **Repository:** ${{ github.repository }}
+            **Author:** ${{ github.actor }}
+            [View Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          theme_color: 'FF0000'
