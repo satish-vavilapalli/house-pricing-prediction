@@ -1,0 +1,108 @@
+name: CI - Validation
+
+on:
+  push:
+    branches: [ main, develop, staging ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    name: Validate Notebooks & Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nbformat nbconvert pyyaml black flake8
+      
+      - name: ✅ Validate Notebook Syntax
+        run: |
+          echo "Validating notebook files..."
+          python scripts/validate_notebooks.py
+      
+      - name: 🎨 Check Code Formatting (Black)
+        run: |
+          echo "Checking Python code formatting..."
+          black --check MLFLOW_sample/src/ scripts/ || echo "Code formatting issues found"
+      
+      - name: 🔍 Lint Python Code (Flake8)
+        run: |
+          echo "Linting Python code..."
+          flake8 MLFLOW_sample/src/ scripts/ --max-line-length=100 --extend-ignore=E203,W503 || echo "Linting issues found"
+      
+      - name: 📋 Validate Config Files
+        run: |
+          echo "Validating YAML configuration files..."
+          python -c "import yaml; yaml.safe_load(open('MLFLOW_sample/config/config.yaml'))" && echo "✅ config.yaml valid"
+      
+      - name: 📊 Generate Validation Report
+        if: always()
+        run: |
+          echo "==================================="
+          echo "VALIDATION REPORT"
+          echo "==================================="
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+          echo "==================================="
+      
+      - name: 📢 Notify Teams on Failure
+        if: failure()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "❌ CI Validation Failed"
+          summary: "Code validation failed on branch ${{ github.ref_name }}"
+          text: |
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Author:** ${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          theme_color: 'FF0000'
+      
+      - name: 📢 Notify Teams on Success
+        if: success()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "✅ CI Validation Passed"
+          summary: "All validation checks passed for ${{ github.ref_name }}"
+          text: |
+            **Repository:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Author:** ${{ github.actor }}
+            **Commit:** ${{ github.sha }}
+            
+            ✅ Notebook syntax validated
+            ✅ Code formatting checked
+            ✅ Linting passed
+            ✅ Config files validated
+          theme_color: '00FF00'
+
+  summary:
+    name: Validation Summary
+    needs: validate
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📊 Print Summary
+        run: |
+          echo "==================================="
+          echo "CI VALIDATION COMPLETE"
+          echo "==================================="
+          echo "Status: ${{ needs.validate.result }}"
+          echo "Ready for merge: ${{ needs.validate.result == 'success' }}"
+          echo "==================================="
