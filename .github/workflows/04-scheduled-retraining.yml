@@ -1,0 +1,50 @@
+name: Scheduled - Weekly Retraining
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  retrain:
+    name: Retrain and Evaluate Model
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: 📦 Install Dependencies
+        run: |
+          pip install databricks-cli mlflow requests
+      
+      - name: 🔐 Configure Databricks
+        run: |
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+      
+      - name: 🔄 Trigger Retraining Job
+        id: retrain
+        run: |
+          echo "Triggering retraining workflow..."
+          RUN_ID=$(databricks jobs run-now --job-id ${{ secrets.RETRAINING_JOB_ID }} | jq -r '.run_id')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Retraining started (Run ID: $RUN_ID)"
+      
+      - name: 📢 Send Teams Notification
+        if: always()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "♻️ Weekly Retraining Complete"
+          summary: "Model retraining completed"
+          text: |
+            **Status:** ${{ job.status }}
+            **Run ID:** ${{ steps.retrain.outputs.run_id }}
+          theme_color: '00FF00'
