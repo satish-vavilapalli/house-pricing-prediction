@@ -1,0 +1,50 @@
+name: Scheduled - Daily Monitoring
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: Run Model Monitoring
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: 📦 Install Dependencies
+        run: |
+          pip install databricks-cli requests
+      
+      - name: 🔐 Configure Databricks
+        run: |
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+      
+      - name: 📊 Run Monitoring Job
+        id: monitoring
+        run: |
+          echo "Starting model monitoring..."
+          RUN_ID=$(databricks jobs run-now --job-id ${{ secrets.MONITORING_JOB_ID }} | jq -r '.run_id')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Monitoring job started (Run ID: $RUN_ID)"
+      
+      - name: 📢 Send Teams Notification
+        if: always()
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "📊 Daily Monitoring Complete"
+          summary: "Model monitoring completed"
+          text: |
+            **Status:** ${{ job.status }}
+            **Run ID:** ${{ steps.monitoring.outputs.run_id }}
+          theme_color: '0078D4'
